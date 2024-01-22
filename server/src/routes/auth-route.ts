@@ -1,15 +1,30 @@
 import { Router, Request, Response } from 'express';
 import asyncHandler from '../utils/async-error-handler';
-import { fetchSearchResults } from '../services/auth-service';
+import { User } from '../models/user-model';
+import { loginSchema } from '../schemas/user-schema';
+import validate from '../middlewares/user-schema-validation';
 
-const searchRouter = Router();
+const userRoute = Router();
 
-searchRouter.get(
-    '/weather',
-    asyncHandler(async (req: Request, res: Response) => {
-        const fetchResult = await fetchSearchResults();
-        res.status(200).json(fetchResult);
-    })
+userRoute.get('/', (req: Request, res: Response) => {
+  res.send('Hello World!');
+});
+
+userRoute.get(
+  '/users',
+  asyncHandler(async (req: Request, res: Response) => {
+    const fetchResult = await User.findAll();
+    res.status(200).json(fetchResult);
+  })
 );
 
-export default searchRouter;
+userRoute.post(
+  '/user',
+  validate(loginSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    const newUser = await User.create(req.body);
+    res.status(200).json(newUser);
+  })
+);
+
+export default userRoute;

@@ -1,23 +1,12 @@
-import express, { Request, Response } from 'express';
-import logger from './config/logger';
-import dotenv from 'dotenv';
+import express from 'express';
 import globalErrorHandler from './middlewares/global-error-handler';
 import searchRouter from './routes/auth-route';
 import limiter from './middlewares/rate-limiter';
 
-dotenv.config();
 const app = express();
-const port = process.env.PORT || 8181;
-
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World!');
-});
-
-app.use(searchRouter);
+app.use(express.json());
 app.use(limiter);
+app.use(searchRouter);
 app.use(globalErrorHandler);
-app.listen(port, () => {
-  logger.info(
-    `Starting Fix My Budget Server on port ${port} ${new Date().toLocaleString()}`
-  );
-});
+
+export default app;
