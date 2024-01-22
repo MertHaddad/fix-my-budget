@@ -22,6 +22,6 @@ jobs:
             cd ~/../projects/fix-my-budget
             git pull
             cd server/
-            npm install --production
-            pm2 restart all
+            npm install
+            pm2 restart fix-my-budget
           EOF
