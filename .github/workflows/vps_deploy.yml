@@ -19,9 +19,9 @@ jobs:
       - name: Deploy to VPS
         run: |
           ssh -o StrictHostKeyChecking=no root@213.238.180.61 <<EOF
-            cd ../projects/demo
+            cd ../projects/fix-my-project
             git pull
-            cd ./fix-my-budget/server
+            cd ./server
             npm install --production
             pm2 restart all
           EOF
