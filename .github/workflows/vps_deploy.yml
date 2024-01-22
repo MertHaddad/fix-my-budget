@@ -1,0 +1,27 @@
+name: Deploy to VPS
+on:
+  push:
+    branches:
+      - main  # replace with your default branch if not 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no root@213.238.180.61 <<EOF
+            cd ../projects/demo
+            git pull
+            cd ./fix-my-budget/server
+            npm install --production
+            pm2 restart all
+          EOF
