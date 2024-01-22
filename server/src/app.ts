@@ -1,8 +1,9 @@
-import express, {  Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import logger from './config/logger';
 import dotenv from 'dotenv';
 import globalErrorHandler from './middlewares/global-error-handler';
 import searchRouter from './routes/auth-route';
+import limiter from './middlewares/rate-limiter';
 
 dotenv.config();
 const app = express();
@@ -13,7 +14,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use(searchRouter);
-
+app.use(limiter);
 app.use(globalErrorHandler);
 app.listen(port, () => {
   logger.info(
