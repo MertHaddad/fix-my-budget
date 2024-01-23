@@ -8,16 +8,6 @@ import {
   AutoIncrement,
 } from 'sequelize-typescript';
 
-/*
-interface UserI {
-    id?: number;
-    name: string;
-    email: string;
-    password: string;
-    createdAt?: any;
-    updatedAt?: any;
- }*/
-
 @Table
 export class User extends Model<User> {
     @PrimaryKey

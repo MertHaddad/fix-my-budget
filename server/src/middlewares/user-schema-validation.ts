@@ -14,8 +14,8 @@ export default function validate(schema: AnyZodObject) {
 
       next();
     } catch (err: any) {
-      logger.error(err.errors);
-      return res.status(400).send(err.errors);
+      logger.error(err);
+      return res.status(400).send(err);
     }
   };
 }
