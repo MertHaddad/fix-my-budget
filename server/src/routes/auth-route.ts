@@ -1,19 +1,26 @@
 import { Router, Request, Response } from 'express';
 import asyncHandler from '../utils/async-error-handler';
 import { User } from '../models/user-model';
-import { loginSchema, signupSchema } from '../schemas/user-schema';
+import {
+  loginSchema,
+  signupSchema,
+  updateSchema,
+} from '../schemas/user-schema';
 import validate from '../middlewares/user-schema-validation';
 import {
   signInController,
   signUpController,
+  updatePasswordController,
 } from '../controllers/auth-controller';
 import { errorLookup } from '../utils/error-lookup';
 
 const userRoute = Router();
-
-userRoute.get('/', (req: Request, res: Response) => {
-  res.send('Hello World!');
-});
+userRoute.get(
+  '/health',
+  asyncHandler(async (req: Request, res: Response) => {
+    res.status(200).send('you service is healthy!');
+  })
+);
 
 userRoute.get(
   '/users',
@@ -24,7 +31,7 @@ userRoute.get(
 );
 
 userRoute.post(
-  '/user',
+  '/signup',
   validate(signupSchema),
   asyncHandler(async (req: Request, res: Response) => {
     const signupRes = await signUpController(req);
@@ -54,6 +61,20 @@ userRoute.post(
       .cookie('jwt-token', signinRes.token, { httpOnly: true })
       .status(200)
       .json({ message: 'Login successful' });
+  })
+);
+
+userRoute.post(
+  '/update/:id',
+  validate(updateSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    const updateRes = await updatePasswordController(req);
+    if (updateRes.error) {
+      const error = errorLookup[updateRes.error];
+      return res.status(error.code).json({ message: error.message });
+    }
+
+    res.status(200).json({ message: 'Updated successful' });
   })
 );
 

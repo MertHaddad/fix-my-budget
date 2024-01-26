@@ -1,27 +1,23 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user-model';
-import { loginSchema, signupSchema } from '../schemas/user-schema';
-import { z } from 'zod';
-import logger from '../config/logger';
-import { errorType } from '../utils/error-lookup';
+import {
+  genericResponseInterface,
+  signinBodyType,
+  signupBodyType,
+  updateBodyType,
+} from '../types/userTypes';
 
-export type signinBody = z.infer<typeof loginSchema>;
-export type signupBody = z.infer<typeof signupSchema>;
-export interface signinResponse {
-  error?: errorType;
-  token?: string;
-  message?: string;
-}
-
-const signInController = async (req: signinBody): Promise<signinResponse> => {
+const signInController = async (
+  req: signinBodyType
+): Promise<genericResponseInterface> => {
   const { email, password } = req.body;
 
   const user = await User.findOne(email as any);
   if (!user) {
     return { error: 'notFoundError' };
   }
-  
+
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     return { error: 'invalidPasswordError' };
@@ -38,10 +34,12 @@ const signInController = async (req: signinBody): Promise<signinResponse> => {
   return { token: token };
 };
 
-const signUpController = async (req: signupBody): Promise<signinResponse> => {
+const signUpController = async (
+  req: signupBodyType
+): Promise<genericResponseInterface> => {
   const { email, password } = req.body;
 
-  const user = await User.findOne(email as any );
+  const user = await User.findOne(email as any);
   if (user) {
     return { error: 'userExistsError' };
   }
@@ -56,7 +54,7 @@ const signUpController = async (req: signupBody): Promise<signinResponse> => {
     { expiresIn: '1h' }
   );
 
-  return { token : token };
+  return { token: token };
 };
 
 // const refreshController = async (req: Request, res: Response) => {
@@ -84,29 +82,26 @@ const signUpController = async (req: signupBody): Promise<signinResponse> => {
 //   return res.status(200).json({ token });
 // };
 
-// const updateUserController = async (req: Request, res: Response) => {
-//   const { email, password } = req.body;
+const updatePasswordController = async (
+  req: updateBodyType
+): Promise<genericResponseInterface> => {
+  const { id } = req.params;
+  const { password } = req.body;
 
-//   if (!email || !password) {
-//     return res.status(400).json({ message: 'Email and password are required' });
-//   }
+  const user = await User.findOne({ where: { id: id } });
 
-//   const user = await User.findOne({ email });
+  if (!user) {
+    return { error: 'notFoundError' };
+  }
 
-//   if (!user) {
-//     return res.status(404).json({ message: 'User not found' });
-//   }
-
-//   const hashedPassword = await bcrypt.hash(password, 10);
-
-//   await User.findByIdAndUpdate(user._id, { password: hashedPassword });
-
-//   return res.status(200).json({ message: 'User updated' });
-// };
+  const hashedPassword = await bcrypt.hash(password as any, 10);
+  await User.update({ password: hashedPassword }, { where: { id: user.id } });
+  return { message: 'Password updated' };
+};
 
 export {
   signInController,
   signUpController,
   //   refreshController,
-  //   updateUserController,
+  updatePasswordController,
 };
